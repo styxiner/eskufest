@@ -1,0 +1,72 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "album-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+
+  // The API will be served from a Custom Domain (configured in phase 7).
+  // workers.dev stays enabled only until then.
+  "workers_dev": true,
+  "observability": { "enabled": true },
+
+  // PUBLIC production configuration (not secrets). The Worker refuses to serve requests
+  // (HTTP 500, fail-closed) if any value is invalid. Local overrides: `.dev.vars`.
+  // Secrets (R2 credentials) are NOT here: use `wrangler secret put` / `.dev.vars`.
+  "vars": {
+    // Auth0 custom domain, host only (e.g. auth.example.com). Used to fetch the JWKS.
+    "AUTH0_DOMAIN": "auth.styxiner.dev",
+    // Expected `aud` claim: identifier of the Auth0 API.
+    "AUTH0_AUDIENCE": "https://eskufest.styxiner.dev",
+    // Expected `iss` claim, exactly as Auth0 emits it (e.g. https://auth.example.com/).
+    "AUTH0_ISSUER": "https://auth.styxiner.dev/",
+    // Namespace of the custom claims set by the post-login Action (e.g. https://album.example.com/).
+    "AUTH0_CLAIMS_NAMESPACE": "https://eskufest.styxiner.dev/",
+    // The only browser origin allowed by CORS (e.g. https://album.example.com).
+    "ALLOWED_ORIGIN": "https://eskufest.styxiner.dev",
+    // Upload limit in bytes (500 MiB). Enforced by the signed Content-Length of the PUT URL.
+    "MAX_UPLOAD_BYTES": "524288000",
+    // R2 S3 endpoint used for presigned URLs: https://<account>.<jurisdiction>.r2.cloudflarestorage.com
+    "R2_ACCOUNT_ID": "a15e9c012d498dd6f90c49424baa7ced",
+    "R2_BUCKET_NAME": "album-media",
+    "R2_JURISDICTION": "eu",
+    // Presigned URL lifetimes, in seconds.
+    "UPLOAD_URL_TTL_SECONDS": "600",
+    "IMAGE_URL_TTL_SECONDS": "600",
+    "VIDEO_URL_TTL_SECONDS": "3600"
+  },
+
+  // Secrets: set with `wrangler secret put <NAME>` (production) or in `.dev.vars` (local).
+  // R2 API token restricted to Object Read & Write on the album-media bucket only.
+  "secrets": {
+    "required": ["R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"]
+  },
+
+  // Hourly cleanup of abandoned uploads.
+  "triggers": {
+    "crons": ["17 * * * *"]
+  },
+
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "album-media",
+      // `wrangler dev` talks to a separate, real dev bucket (presigned URLs need real R2).
+      // Set R2_BUCKET_NAME=album-media-dev in .dev.vars to match.
+      "preview_bucket_name": "album-media-dev",
+      "remote": true,
+      // EU jurisdiction: data is stored and processed only inside the EU.
+      // Its S3 endpoint is <account_id>.eu.r2.cloudflarestorage.com.
+      "jurisdiction": "eu"
+    }
+  ],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "album",
+      // Output of `wrangler d1 create album`. Not a secret.
+      "database_id": "0101de9c-4e15-4207-8273-731ebf57b52d",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

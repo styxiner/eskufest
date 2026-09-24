@@ -3,10 +3,17 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "config": "node scripts/generate-config.mjs",
+    "config:strict": "node scripts/generate-config.mjs --strict",
+    "prestart": "npm run config",
     "start": "ng serve",
+    "prebuild": "npm run config",
     "build": "ng build",
+    "build:prod": "npm run config:strict && ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "pretest": "npm run config",
+    "test": "ng test --watch=false",
+    "lint": "ng lint"
   },
   "private": true,
   "packageManager": "npm@11.16.0",
@@ -17,6 +24,7 @@
     "@angular/forms": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
+    "@auth0/auth0-angular": "^2.12.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -24,9 +32,13 @@
     "@angular/build": "^22.0.4",
     "@angular/cli": "^22.0.4",
     "@angular/compiler-cli": "^22.0.0",
+    "@eslint/js": "^10.0.1",
+    "angular-eslint": "22.5.0",
+    "eslint": "^10.9.1",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
+    "typescript-eslint": "8.69.0",
     "vitest": "^4.0.8"
   }
 }

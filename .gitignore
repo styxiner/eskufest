@@ -42,3 +42,12 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local configuration / secrets (never commit)
+.env
+.env.*
+!.env.example
+/src/app/core/config/app-config.generated.ts
+
+worker/.dev.vars
+worker/.env

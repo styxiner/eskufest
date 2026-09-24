@@ -1,0 +1,12 @@
+# Local development only (gitignored).
+AUTH0_DOMAIN=
+AUTH0_AUDIENCE=
+AUTH0_ISSUER=
+AUTH0_CLAIMS_NAMESPACE=
+ALLOWED_ORIGIN=http:
+
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+
+# wrangler dev uses the real dev bucket (preview_bucket_name)
+R2_BUCKET_NAME=
